@@ -1,54 +1,40 @@
+import os
 from textual.app import App
-from textual.widgets import Header, Footer, Static
-from extract import get_details
+from textual.containers import Horizontal
+from components.card import Card
+from fetch import get_data
+
+os.environ["COLORTERM"] = "truecolor"
 
 class Pulse(App):
     CSS = """
     Screen {
-        layout: vertical;
-        align: center middle;
-    }
-    #data-display {
-        width: 80%;
-        height: auto;
-        padding: 2;
-        border: solid dodgerblue;
-        content-align: center middle;
-    }
-    .key {
-        color: green;
-        font-weight: bold;
-    }
-    .value {
-        color: yellow;
+        background: rgb(35, 35, 35)
     }
     """
 
-    BINDINGS = [
-        ("q", "quit", "Quit")
-    ]
-
     def compose(self):
-        yield Header()
-        yield Footer()
-        yield Static("Initializing data...", id="data-display")
+        data = get_data()
+        
+        with Vertical():
+            with Horizontal():
+                yield Card("CPU", data["CPU"], id = "cpu-card")
+                yield Card("Memory", data["Memory"], id = "memory-card")
+            
+            with Horizontal():
+                yield Card("Network", data["Network"], id = "network-card")
+                yield Card("Storage", data["Storage"], id = "storage-card")
 
-    def on_mount(self) -> None:
-        self.set_interval(1.0, self.update_data)
+    def on_mount(self):
+        self.set_interval(1.0, self.update)
 
-    def update_data(self) -> None:
-        data = get_details()
-        data_widget = self.query_one("#data-display", Static)
-        display_lines = []
-        for key, value in data.items():
-            line = (
-                f"[class=key]{key}:[/class] "
-                f"[class=value]{value}[/class]"
-            )
-            display_lines.append(line)
+    def update(self):
+        data = get_data()
 
-        data_widget.update("\n".join(display_lines))
-
+        self.query_one("#cpu-card", Card).update(data["cpu"])
+        self.query_one("#memory-card", Card).update(data["memory"])
+        self.query_one("#network-card", Card).update(data["cpu"])
+        self.query_one("#storage-card", Card).update(data["memory"])
 
 if __name__ == "__main__":
     app = Pulse()
