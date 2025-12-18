@@ -1,6 +1,6 @@
 import os
 from textual.app import App
-from textual.containers import Horizontal
+from textual.containers import Horizontal, Vertical
 from components.card import Card
 from fetch import get_data
 
