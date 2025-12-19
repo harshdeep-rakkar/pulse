@@ -4,12 +4,17 @@ import time
 bytes_in_mb = 1024 ** 2
 bytes_in_gb = 1024 ** 3
 
-def get_cpu_data():
-    return {
-        "Cores": psutil.cpu_count(),
-        "Frequency": round(psutil.cpu_freq().current, 2),
-        "Usage": psutil.cpu_percent(interval = 1)
-    }
+def get_cpu_data(instant = False):
+    if (instant):
+        return {
+            "cores": psutil.cpu_count(),
+            "frequency": round(psutil.cpu_freq().current, 2)
+        }
+    
+    else:
+        return {
+            "usage": psutil.cpu_percent(interval = 1)
+        }
 
 def get_memory_data():
     virtual_memory = psutil.virtual_memory()
@@ -72,7 +77,7 @@ def get_processes():
             "Process ID": info["pid"],
             "Process name": info["name"],
             "CPU utilization": info["cpu_percent"],
-            "Memory": round(memory.rss / bytes_in_mb, 2)
+            "Memory": round(memory.rss / bytes_in_mb, 2),
         }
         
         processes.append(readable_info)
