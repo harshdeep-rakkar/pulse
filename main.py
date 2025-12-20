@@ -9,13 +9,12 @@ os.environ["COLORTERM"] = "truecolor"
 class Pulse(App):
     CSS = """
     Screen {
-        background: rgb(35, 35, 35);
+        background: rgb(25, 25, 25);
         padding: 1 2;
     }
 
-    .system-info {
-        layout: grid;
-        grid-size: 2;
+    .row {
+        layout: horizontal;
         height: auto;
     }
 
@@ -25,18 +24,17 @@ class Pulse(App):
     """
 
     def compose(self):
-        with Container(classes = "system-info"):
+        with Container(classes = "row"):
             
             with Container(classes = "column"):
                 yield Card("CPU")
-                yield Card("Network")
+                yield Card("Processes")
             
             with Container(classes = "column"):
                 yield Card("Memory")
                 yield Card("Battery")
                 yield Card("Storage")
-
-        yield Card("Processes")
+                yield Card("Network")
 
 if __name__ == "__main__":
     app = Pulse()

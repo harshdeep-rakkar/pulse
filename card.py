@@ -1,53 +1,32 @@
 from textual.containers import Container
-from textual.widgets import Label
-from components.cpu import CPU
+from components import cpu, battery, network
 
 class Card(Container):
     DEFAULT_CSS = """
     Card {
-        background: rgb(30, 30, 30);
-        border: none;
+        border: white;
         height: auto;
-        margin: 1 2;
+        margin: 1 3;
         padding: 1 4;
-    }
-
-    .card-title {
-        width: 100%;
-        content-align: center middle;
-        background: rgb(25, 25, 25);
-        padding-top: 1;
-        padding-bottom: 1;
-    }
-
-    .row {
-        layout: horizontal;
-        height: auto;
-    }
-
-    .card-body {
-        height: auto;
-        padding-top: 1;
+        border-title-align: center;
     }
     """
 
     def __init__(self, title):
         super().__init__()
-        self.title = title
+        self.border_title = title
 
     def compose(self):
-        yield Label(self.title, classes = "card-title")
-
-        match self.title:
+        match self.border_title:
             case "CPU":
-                yield CPU(classes = "card-body")
+                yield cpu.CPU()
             case "Memory":
                 pass
             case "Network":
-                pass
+                yield network.Network()
             case "Storage":
                 pass
             case "Battery":
-                pass
+                yield battery.Battery()
             case "System Processes":
                 pass
