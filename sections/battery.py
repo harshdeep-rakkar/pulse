@@ -23,9 +23,9 @@ class Battery(Container):
         width: 1fr;
     }
 
-    #battery-bar Bar > .bar--bar {
-        color: green;
-        background: red;
+    #battery-bar Bar > .bar--bar, #battery-bar Bar > .bar--complete {
+        color: rgb(100, 220, 100);
+        background: rgb(220, 100, 100);
     }
     """
 

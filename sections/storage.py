@@ -23,7 +23,7 @@ class Storage(Container):
         width: 1fr;
     }
 
-    #storage-bar Bar > .bar--bar {
+    #storage-bar Bar > .bar--bar, #storage-bar Bar > .bar--complete {
         color: rgb(50, 140, 220);
         background: rgb(20, 50, 100);
     }

@@ -13,15 +13,15 @@ class Processes(Container):
     #process-table {
         width: auto;
         max-width: 100%;
-        background: rgb(30, 30, 30);
-        border: tall rgb(45, 45, 45);
-        padding-left: 2;
-        padding-right: 2;
+        background: rgb(25, 25, 25);
+        border: hidden;
+        padding-left: 1;
+        padding-right: 1;
         background-tint: transparent 0%;
     }
 
     #process-table > .datatable--header {
-        background: rgb(25, 25, 25);
+        background: rgb(35, 35, 35);
         background-tint: transparent 0%;
         text-style: none;
     }

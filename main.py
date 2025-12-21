@@ -23,15 +23,18 @@ class Pulse(App):
     }
     """
 
+    def on_mount(self) -> None:
+        self.call_after_refresh(self.screen.scroll_home, animate = False)
+
     def compose(self):
+        yield Card("CPU")
+
         with Container(classes = "row"):
-            
-            with Container(classes = "column"):
-                yield Card("CPU")
-                yield Card("Network")
-            
             with Container(classes = "column"):
                 yield Card("Memory")
+            
+            with Container(classes = "column"):
+                yield Card("Network")
                 yield Card("Battery")
                 yield Card("Storage")
         
