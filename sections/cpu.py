@@ -1,5 +1,5 @@
 from textual.containers import Container
-from textual.widgets import Label
+from textual.widgets import Label, Static
 from psutil import cpu_count, cpu_freq
 
 class CPU(Container):
@@ -13,8 +13,9 @@ class CPU(Container):
         height: auto;
     }
 
-    #cores, #frequency {
+    .spacer {
         width: 1fr;
+        min-width: 4;
     }
     """
 
@@ -29,4 +30,5 @@ class CPU(Container):
     def compose(self):
         with Container(classes = "row"):
             yield Label(id = "cores")
+            yield Static(classes = "spacer")
             yield Label(id = "frequency")

@@ -28,13 +28,14 @@ class Pulse(App):
             
             with Container(classes = "column"):
                 yield Card("CPU")
-                yield Card("Processes")
+                yield Card("Network")
             
             with Container(classes = "column"):
                 yield Card("Memory")
                 yield Card("Battery")
                 yield Card("Storage")
-                yield Card("Network")
+        
+        yield Card("Processes")
 
 if __name__ == "__main__":
     app = Pulse()

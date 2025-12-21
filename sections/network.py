@@ -1,6 +1,6 @@
 from psutil import net_io_counters
 from textual.containers import Container
-from textual.widgets import Label
+from textual.widgets import Label, Static
 
 class Network(Container):
     DEFAULT_CSS = """
@@ -13,8 +13,9 @@ class Network(Container):
         height: auto;
     }
 
-    #incoming, #outgoing {
+    .spacer {
         width: 1fr;
+        min-width: 4;
     }
     """
     
@@ -42,4 +43,5 @@ class Network(Container):
     def compose(self):
         with Container(classes = "row"):
             yield Label(id = "outgoing")
+            yield Static(classes = "spacer")
             yield Label(id = "incoming")

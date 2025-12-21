@@ -1,5 +1,5 @@
 from textual.containers import Container
-from textual.widgets import Label, ProgressBar
+from textual.widgets import Label, ProgressBar, Static
 from psutil import sensors_battery
 
 class Battery(Container):
@@ -14,8 +14,9 @@ class Battery(Container):
         margin-top: 1;
     }
 
-    #charging, #time-remaining {
+    .spacer {
         width: 1fr;
+        min-width: 4;
     }
 
     #battery-bar Bar {
@@ -57,4 +58,5 @@ class Battery(Container):
 
         with Container(classes = "row"):
             yield Label(id = "charging")
+            yield Static(classes = "spacer")
             yield Label(id = "time-remaining")
