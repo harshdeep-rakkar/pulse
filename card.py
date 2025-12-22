@@ -1,5 +1,5 @@
 from textual.containers import Container
-from sections import cpu, battery, network, storage, processes
+from sections import cpu, battery, network, storage, processes, memory
 
 class Card(Container):
     DEFAULT_CSS = """
@@ -21,7 +21,7 @@ class Card(Container):
             case "CPU":
                 yield cpu.CPU()
             case "Memory":
-                pass
+                yield memory.Memory()
             case "Network":
                 yield network.Network()
             case "Storage":

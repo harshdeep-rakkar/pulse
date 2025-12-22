@@ -12,7 +12,6 @@ class Processes(Container):
 
     #process-table {
         width: auto;
-        max-width: 100%;
         background: rgb(25, 25, 25);
         border: hidden;
         padding-left: 1;
