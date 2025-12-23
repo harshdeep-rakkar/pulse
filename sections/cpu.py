@@ -1,25 +1,16 @@
-from textual.containers import Container, Grid
-from textual.widgets import Label, Static, ProgressBar
-from psutil import cpu_count, cpu_freq, cpu_percent, cpu_times_percent
+from textual.containers import Container
+from textual.widgets import Label, ProgressBar
+from textual.reactive import reactive
+from psutil import cpu_count, cpu_freq, cpu_percent
 
 class CPU(Container):
     DEFAULT_CSS = """
     CPU {
         height: auto;
     }
-
-    .row {
-        layout: horizontal;
-        height: auto;
-        margin-top: 1;
-    }
-
-    .spacer {
-        width: 1fr;
-        min-width: 4;
-    }
     
-    .per-core-usage {
+    .info {
+        layout: grid;
         grid-size: 4;
         grid-gutter: 1 4;
         height: auto;
@@ -34,40 +25,70 @@ class CPU(Container):
         color: rgb(220, 140, 220);
         background: rgb(80, 30, 80);
     }
+
+    #cpu-usage {
+        width: 1fr;
+        content-align: left middle;
+        column-span: 2;
+    }
+
+    #frequency {
+        width: 1fr;
+        content-align: right middle;
+        column-span: 2;
+    }
+
+    .info.two-columns {
+        grid-size: 2; 
+    }
+
+    .info.two-columns #cpu-usage,
+    .info.two-columns #frequency {
+        column-span: 1;
+    }
+
+    .info.stacked {
+        grid-size: 1; 
+    }
+
+    .info.stacked #cpu-usage,
+    .info.stacked #frequency {
+        content-align: left middle;
+    }
     """
+
+    narrow = reactive(False)
+    very_narrow = reactive(False)
+
+    def compose(self):
+        with Container(classes = "info"):
+            for i in range(cpu_count()):
+                with Container(classes = "core-info"):
+                    yield Label(f"Core {i + 1}  ", classes = "core-label")
+                    yield ProgressBar(total = 100, show_eta = False, show_percentage = False, id = f"core-bar-{i + 1}", classes = "core-bar")
+
+            yield Label(id = "cpu-usage")
+            yield Label(id = "frequency")
 
     def on_mount(self):
         self.update_data()
         self.set_interval(1.0, self.update_data)
 
     def update_data(self):
-        cpu_times = cpu_times_percent()
-        
-        self.query_one("#cpu-usage", Label).update(f"Usage: {cpu_percent()}%")
-        self.query_one("#user", Label).update(f"User mode: {cpu_times.user}%")
-        self.query_one("#system", Label).update(f"Kernel mode: {cpu_times.system}%")
-        self.query_one("#idle", Label).update(f"Idle: {cpu_times.idle}%")
-        self.query_one("#frequency", Label).update(f"Frequency: {cpu_freq().current:.2f} MHz")
-        
         core_usage = cpu_percent(percpu = True)
         
         for i, usage in enumerate(core_usage):
             self.query_one(f"#core-bar-{i + 1}", ProgressBar).update(progress = usage)
-    
-    def compose(self):
-        with Grid(classes = "per-core-usage"):
-            for i in range(cpu_count()):
-                with Container(classes = "core-info"):
-                    yield Label(f"Core {i + 1}  ", classes = "core-label")
-                    yield ProgressBar(total = 100, show_eta = False, show_percentage = True, id = f"core-bar-{i + 1}", classes = "core-bar")
+        
+        self.query_one("#cpu-usage", Label).update(f"Usage: {cpu_percent()}%")
+        self.query_one("#frequency", Label).update(f"Frequency: {cpu_freq().current:.2f} MHz")
 
-        with Container(classes = "row"):
-            yield Label(id = "cpu-usage")
-            yield Static(classes = "spacer")
-            yield Label(id = "user")
-            yield Static(classes = "spacer")
-            yield Label(id = "system")
-            yield Static(classes = "spacer")
-            yield Label(id = "idle")
-            yield Static(classes = "spacer")
-            yield Label(id = "frequency")
+    def on_resize(self):
+        self.narrow = self.app.size.width < 80
+        self.very_narrow = self.app.size.width < 60
+
+    def watch_narrow(self, narrow):
+        self.query_one(".info").set_class(narrow, "two-columns")
+
+    def watch_very_narrow(self, very_narrow):
+        self.query_one(".info").set_class(very_narrow, "stacked")

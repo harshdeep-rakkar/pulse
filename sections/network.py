@@ -1,6 +1,7 @@
 from psutil import net_io_counters
 from textual.containers import Container
-from textual.widgets import Label, Static
+from textual.widgets import Label
+from textual.reactive import reactive
 
 class Network(Container):
     DEFAULT_CSS = """
@@ -8,21 +9,43 @@ class Network(Container):
         height: auto;
     }
 
-    .row {
-        layout: horizontal;
+    .info {
+        layout: grid;
+        grid-size: 2;
         height: auto;
     }
 
-    .spacer {
+    #outgoing {
         width: 1fr;
-        min-width: 4;
+        content-align: left middle;
+    }
+
+    #incoming {
+        width: 1fr;
+        content-align: right middle;
+    }
+
+    .info.stacked {
+        grid-size: 1; 
+    }
+
+    .info.stacked #outgoing,
+    .info.stacked #incoming {
+        content-align: center middle;
     }
     """
+
+    narrow = reactive(False)
     
     def __init__(self):
         super().__init__()
         self.previous_recv = 0
         self.previous_sent = 0
+
+    def compose(self):
+        with Container(classes = "info"):
+            yield Label(id = "outgoing")
+            yield Label(id = "incoming")
     
     def on_mount(self):
         self.update_data()
@@ -39,9 +62,9 @@ class Network(Container):
         
         self.query_one("#outgoing", Label).update(f"[rgb(50, 140, 220)]▲[/rgb(50, 140, 220)] {sent_rate:.2f} MB/s")
         self.query_one("#incoming", Label).update(f"[rgb(50, 140, 220)]▼[/rgb(50, 140, 220)] {recv_rate:.2f} MB/s")
-    
-    def compose(self):
-        with Container(classes = "row"):
-            yield Label(id = "outgoing")
-            yield Static(classes = "spacer")
-            yield Label(id = "incoming")
+
+    def on_resize(self):
+        self.narrow = self.app.size.width < 45
+
+    def watch_narrow(self, narrow):
+        self.query_one(".info").set_class(narrow, "stacked")

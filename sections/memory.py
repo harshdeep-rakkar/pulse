@@ -1,6 +1,7 @@
 from psutil import virtual_memory, swap_memory
 from textual.containers import Container
 from textual.widgets import Label
+from textual.reactive import reactive
 
 from plot import Plot
 
@@ -10,41 +11,57 @@ class Memory(Container):
         height: auto;
     }
 
-    #virtual-memory-plot {
-        height: 12;
-    }
-
-    .labels {
-        margin-top: 2;
+    .info {
         layout: grid;
         grid-size: 2;
         grid-gutter: 1 0;
         height: auto;
     }
 
-    .labels > .column1 {
-        content-align: left middle;
-        width: 1fr;
+    #virtual-memory-plot {
+        height: 13;
+        column-span: 2;
     }
 
-    .labels > .column2 {
-        content-align: right middle;
+    #used-memory, #total-memory {
         width: 1fr;
+        content-align: left middle;
+    }
+
+    #used-swap, #total-swap {
+        width: 1fr;
+        content-align: right middle;
+    }
+
+    .info.stacked {
+        grid-size: 1; 
+    }
+
+    .info.stacked #virtual-memory-plot {
+        column-span: 1;
+    }
+
+    .info.stacked #used-memory,
+    .info.stacked #used-swap,
+    .info.stacked #total-memory,
+    .info.stacked #total-swap {
+        content-align: left middle;
     }
     """
 
+    narrow = reactive(False)
+
     def __init__(self):
         super().__init__()
-        self.history: list[float] = [0.0] * 60
+        self.history = [0.0] * 60
 
     def compose(self):
-        yield Plot(id = "virtual-memory-plot")
-
-        with Container(classes = "labels"):
-            yield Label(id = "used-memory", classes = "column1")
-            yield Label(id = "used-swap", classes = "column2")
-            yield Label(id = "total-memory", classes = "column1")
-            yield Label(id = "total-swap", classes = "column2")
+        with Container(classes = "info"):
+            yield Label(id = "used-memory")
+            yield Label(id = "used-swap")
+            yield Label(id = "total-memory")
+            yield Label(id = "total-swap")
+            yield Plot(id = "virtual-memory-plot")
     
     def on_mount(self):
         self.update_data()
@@ -57,30 +74,35 @@ class Memory(Container):
         used_virtual_memory = round(virtual_memory_info.used / (1024 ** 3), 2)
         total_virtual_memory = round(virtual_memory_info.total / (1024 ** 3), 2)
 
-        used_swap_memory = round(swap_memory_info.used / (1024 ** 3), 2)
-        total_swap_memory = round(swap_memory_info.total / (1024 ** 3), 2)
-
-        self.query_one("#used-memory", Label).update(f"Used memory: {used_virtual_memory} GB")
-        self.query_one("#total-memory", Label).update(f"Total memory: {total_virtual_memory} GB")
-
-        self.query_one("#used-swap", Label).update(f"Used swap memory: {used_swap_memory} GB")
-        self.query_one("#total-swap", Label).update(f"Total swap memory: {total_swap_memory} GB")
-
         self.history.append(used_virtual_memory)
         self.history.pop(0)
 
-        plot_widget = self.query_one("#virtual-memory-plot", Plot)
-        graph = plot_widget.plt
+        graph = self.query_one("#virtual-memory-plot", Plot).create()
 
         graph.clear_figure()
         
-        graph.plot(self.history, marker = "braille", fillx = True, color = "red")
+        graph.plot(self.history, marker = "braille", fillx = True, color = (220, 60, 100))
+        graph.title("Memory Usage (GB)")
         graph.ylim(0, total_virtual_memory)
-        graph.title("Virtual Memory Usage (GB)")
-        graph.xlabel("Seconds")
         graph.yticks([0, round(total_virtual_memory / 2, 2), total_virtual_memory])
         graph.xticks([0, 30, 60])
         graph.canvas_color((25, 25, 25))
         graph.ticks_color((255, 255, 255))
         graph.axes_color((25, 25, 25))
-        plot_widget.refresh()
+
+        self.query_one("#virtual-memory-plot", Plot).refresh()
+
+        self.query_one("#used-memory", Label).update(f"Used memory: {used_virtual_memory} GB")
+        self.query_one("#total-memory", Label).update(f"Total memory: {total_virtual_memory} GB")
+
+        used_swap_memory = round(swap_memory_info.used / (1024 ** 3), 2)
+        total_swap_memory = round(swap_memory_info.total / (1024 ** 3), 2)
+
+        self.query_one("#used-swap", Label).update(f"Used swap: {used_swap_memory} GB")
+        self.query_one("#total-swap", Label).update(f"Total swap: {total_swap_memory} GB")
+
+    def on_resize(self):
+        self.narrow = self.app.size.width < 60
+
+    def watch_narrow(self, narrow):
+        self.query_one(".info").set_class(narrow, "stacked")

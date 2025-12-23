@@ -12,17 +12,23 @@ class Processes(Container):
 
     #process-table {
         width: auto;
+        max-width: 100%;
         background: rgb(25, 25, 25);
-        border: hidden;
+        border: round rgb(220, 150, 80);
         padding-left: 1;
         padding-right: 1;
         background-tint: transparent 0%;
     }
 
     #process-table > .datatable--header {
-        background: rgb(35, 35, 35);
+        background: rgb(25, 25, 25);
         background-tint: transparent 0%;
         text-style: none;
+        color: rgb(220, 150, 80);
+    }
+
+    #process-table > .scrollbar--horizontal {
+        dock: top;
     }
     """
 
@@ -31,6 +37,7 @@ class Processes(Container):
 
     def on_mount(self):
         table = self.query_one("#process-table")
+
         table.add_columns(
             "Process ID",
             "Process name",

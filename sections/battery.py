@@ -1,5 +1,6 @@
 from textual.containers import Container
-from textual.widgets import Label, ProgressBar, Static
+from textual.widgets import Label, ProgressBar
+from textual.reactive import reactive
 from psutil import sensors_battery
 
 class Battery(Container):
@@ -8,26 +9,63 @@ class Battery(Container):
         height: auto;
     }
 
-    .row {
-        layout: horizontal;
+    .info {
+        layout: grid;
+        grid-size: 2;
+        grid-gutter: 1 0;
         height: auto;
-        margin-top: 1;
     }
 
-    .spacer {
-        width: 1fr;
-        min-width: 4;
+    #battery-percentage {
+        column-span: 2;
     }
 
-    #battery-bar Bar {
+    #battery-percentage Bar {
         width: 1fr;
     }
 
-    #battery-bar Bar > .bar--bar, #battery-bar Bar > .bar--complete {
+    #battery-percentage Bar > .bar--bar, #battery-bar Bar > .bar--complete {
         color: rgb(100, 220, 100);
         background: rgb(220, 100, 100);
     }
+
+    #charging-status {
+        width: 1fr;
+        content-align: left middle;
+    }
+
+    #time-remaining {
+        width: 1fr;
+        content-align: right middle;
+    }
+
+    .info.stacked {
+        grid-size: 1; 
+    }
+
+    .info.stacked #battery-percentage {
+        column-span: 1;
+    }
+
+    .info.stacked #charging-status,
+    .info.stacked #time-remaining {
+        content-align: left middle;
+    }
     """
+
+    narrow = reactive(False)
+
+    def compose(self):
+        with Container(classes = "info"):
+            yield ProgressBar(
+                total = 100,
+                show_percentage = True,
+                show_eta = False,
+                id = "battery-percentage"
+            )
+
+            yield Label(id = "charging-status")
+            yield Label(id = "time-remaining")
 
     def on_mount(self):
         self.update_data()
@@ -35,6 +73,12 @@ class Battery(Container):
 
     def update_data(self):
         battery = sensors_battery()
+
+        bar = self.query_one("#battery-percentage", ProgressBar)
+        bar.update(progress = battery.percent)
+
+        self.query_one("#charging-status", Label).update(f"Charging: {battery.power_plugged}")
+
         hours_remaining = battery.secsleft // 3600
         minutes_remaining = (battery.secsleft // 60) - (hours_remaining * 60)
 
@@ -43,20 +87,8 @@ class Battery(Container):
         else:
             self.query_one("#time-remaining", Label).update(f"Time remaining: {minutes_remaining} min")
 
-        bar = self.query_one("#battery-bar", ProgressBar)
-        bar.update(progress = battery.percent)
+    def on_resize(self):
+        self.narrow = self.app.size.width < 60
 
-        self.query_one("#charging", Label).update(f"Charging: {battery.power_plugged}")
-
-    def compose(self):
-        yield ProgressBar(
-            total = 100,
-            show_percentage = True,
-            show_eta = False,
-            id = "battery-bar"
-        )
-
-        with Container(classes = "row"):
-            yield Label(id = "charging")
-            yield Static(classes = "spacer")
-            yield Label(id = "time-remaining")
+    def watch_narrow(self, narrow):
+        self.query_one(".info").set_class(narrow, "stacked")

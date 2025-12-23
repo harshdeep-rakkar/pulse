@@ -1,5 +1,6 @@
 from textual.containers import Container
-from textual.widgets import Label, ProgressBar, Static
+from textual.widgets import Label, ProgressBar
+from textual.reactive import reactive
 from psutil import disk_partitions, disk_usage
 
 class Storage(Container):
@@ -8,15 +9,15 @@ class Storage(Container):
         height: auto;
     }
 
-    .row {
-        layout: horizontal;
+    .info {
+        layout: grid;
+        grid-size: 2;
+        grid-gutter: 1 0;
         height: auto;
-        margin-top: 1;
     }
 
-    .spacer {
-        width: 1fr;
-        min-width: 4;
+    #storage-bar {
+        column-span: 2;
     }
 
     #storage-bar Bar {
@@ -27,7 +28,44 @@ class Storage(Container):
         color: rgb(50, 140, 220);
         background: rgb(20, 50, 100);
     }
+
+    #used {
+        width: 1fr;
+        content-align: left middle;
+    }
+
+    #total {
+        width: 1fr;
+        content-align: right middle;
+    }
+
+    .info.stacked {
+        grid-size: 1; 
+    }
+
+    .info.stacked #storage-bar {
+        column-span: 1;
+    }
+
+    .info.stacked #used,
+    .info.stacked #total {
+        content-align: left middle;
+    }
     """
+
+    narrow = reactive(False)
+
+    def compose(self):
+        with Container(classes = "info"):
+            yield ProgressBar(
+                total = 100,
+                show_percentage = True,
+                show_eta = False,
+                id = "storage-bar"
+            )
+
+            yield Label(id = "used")
+            yield Label(id = "total")
 
     def on_mount(self):
         partitions = disk_partitions(all = False)
@@ -46,15 +84,8 @@ class Storage(Container):
         self.query_one("#used", Label).update(f"Used: {(used / 1024 ** 3):.2f} GB")
         self.query_one("#total", Label).update(f"Total: {(total / 1024 ** 3):.2f} GB")
 
-    def compose(self):
-        yield ProgressBar(
-            total = 100,
-            show_percentage = True,
-            show_eta = False,
-            id = "storage-bar"
-        )
+    def on_resize(self):
+        self.narrow = self.app.size.width < 50
 
-        with Container(classes = "row"):
-            yield Label(id = "used")
-            yield Static(classes = "spacer")
-            yield Label(id = "total")
+    def watch_narrow(self, narrow):
+        self.query_one(".info").set_class(narrow, "stacked")

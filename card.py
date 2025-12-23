@@ -4,17 +4,16 @@ from sections import cpu, battery, network, storage, processes, memory
 class Card(Container):
     DEFAULT_CSS = """
     Card {
-        border: white;
+        border: round rgb(255, 255, 255);
         height: auto;
-        margin: 1 3;
         padding: 1 4;
         border-title-align: center;
     }
     """
 
-    def __init__(self, title):
-        super().__init__()
-        self.border_title = title
+    def __init__(self, classes = None):
+        super().__init__(classes = classes)
+        self.border_title = classes
 
     def compose(self):
         match self.border_title:
