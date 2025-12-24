@@ -6,10 +6,6 @@ from psutil import sensors_battery
 class Battery(Container):
     DEFAULT_CSS = """
     Battery {
-        height: auto;
-    }
-
-    .info {
         layout: grid;
         grid-size: 2;
         grid-gutter: 1 0;
@@ -39,33 +35,36 @@ class Battery(Container):
         content-align: right middle;
     }
 
-    .info.stacked {
+    Battery.stacked {
         grid-size: 1; 
     }
 
-    .info.stacked #battery-percentage {
+    Battery.stacked #battery-percentage {
         column-span: 1;
     }
 
-    .info.stacked #charging-status,
-    .info.stacked #time-remaining {
+    Battery.stacked #charging-status,
+    Battery.stacked #time-remaining {
         content-align: left middle;
     }
     """
 
     narrow = reactive(False)
 
-    def compose(self):
-        with Container(classes = "info"):
-            yield ProgressBar(
-                total = 100,
-                show_percentage = True,
-                show_eta = False,
-                id = "battery-percentage"
-            )
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
 
-            yield Label(id = "charging-status")
-            yield Label(id = "time-remaining")
+    def compose(self):
+        yield ProgressBar(
+            total = 100,
+            show_percentage = True,
+            show_eta = False,
+            id = "battery-percentage"
+        )
+
+        yield Label(id = "charging-status")
+        yield Label(id = "time-remaining")
 
     def on_mount(self):
         self.update_data()
@@ -91,4 +90,4 @@ class Battery(Container):
         self.narrow = self.app.size.width < 60
 
     def watch_narrow(self, narrow):
-        self.query_one(".info").set_class(narrow, "stacked")
+        self.set_class(narrow, "stacked")

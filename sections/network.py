@@ -6,10 +6,6 @@ from textual.reactive import reactive
 class Network(Container):
     DEFAULT_CSS = """
     Network {
-        height: auto;
-    }
-
-    .info {
         layout: grid;
         grid-size: 2;
         height: auto;
@@ -25,27 +21,27 @@ class Network(Container):
         content-align: right middle;
     }
 
-    .info.stacked {
+    Network.stacked {
         grid-size: 1; 
     }
 
-    .info.stacked #outgoing,
-    .info.stacked #incoming {
+    Network.stacked #outgoing,
+    Network.stacked #incoming {
         content-align: center middle;
     }
     """
 
     narrow = reactive(False)
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
         self.previous_recv = 0
         self.previous_sent = 0
 
     def compose(self):
-        with Container(classes = "info"):
-            yield Label(id = "outgoing")
-            yield Label(id = "incoming")
+        yield Label(id = "outgoing")
+        yield Label(id = "incoming")
     
     def on_mount(self):
         self.update_data()
@@ -67,4 +63,4 @@ class Network(Container):
         self.narrow = self.app.size.width < 45
 
     def watch_narrow(self, narrow):
-        self.query_one(".info").set_class(narrow, "stacked")
+        self.set_class(narrow, "stacked")

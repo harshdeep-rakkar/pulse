@@ -2,9 +2,7 @@ import os
 from textual.app import App
 from textual.containers import Container
 from textual.reactive import reactive
-
-from card import Card
-from width_indicator import WidthIndicator
+from sections import battery, cpu, memory, network, processes, storage
 
 os.environ["COLORTERM"] = "truecolor"
 
@@ -22,29 +20,32 @@ class Pulse(App):
         height: auto;
     }
 
-    .CPU, .Processes {
+    .card {
+        border: round rgb(255, 255, 255);
+        height: auto;
+        padding: 1 4;
+        border-title-align: center;
+        align: center middle;
+    }
+
+    #cpu, #processes {
         column-span: 2;
     }
 
-    .Memory {
+    #memory {
         row-span: 3;
-    }
-
-    .width-indicator {
-        column-span: 2;
     }
 
     .cards.stacked {
         grid-size: 1; 
     }
 
-    .cards.stacked .CPU, 
-    .cards.stacked .Processes,
-    .cards.stacked .width-indicator {
+    .cards.stacked #cpu, 
+    .cards.stacked #processes {
         column-span: 1;
     }
 
-    .cards.stacked .Memory {
+    .cards.stacked #memory {
         row-span: 1;
     }
     """
@@ -53,13 +54,12 @@ class Pulse(App):
 
     def compose(self):
         with Container(classes = "cards"):
-            yield Card(classes = "CPU")
-            yield Card(classes = "Memory")
-            yield Card(classes = "Network")
-            yield Card(classes = "Battery")
-            yield Card(classes = "Storage")
-            yield Card(classes = "Processes")
-            yield WidthIndicator(classes = "width-indicator")
+            yield cpu.CPU(classes = "card", id = "cpu", title = "CPU")
+            yield memory.Memory(classes = "card", id = "memory", title = "Memory")
+            yield network.Network(classes = "card", id = "network", title = "Network")
+            yield battery.Battery(classes = "card", id = "battery", title = "Battery")
+            yield storage.Storage(classes = "card", id = "storage", title = "Storage")
+            yield processes.Processes(classes = "card", id = "processes", title = "Processes")
 
     def on_mount(self):
         self.call_after_refresh(self.screen.scroll_home, animate = False)

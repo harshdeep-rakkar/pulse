@@ -6,10 +6,6 @@ from psutil import disk_partitions, disk_usage
 class Storage(Container):
     DEFAULT_CSS = """
     Storage {
-        height: auto;
-    }
-
-    .info {
         layout: grid;
         grid-size: 2;
         grid-gutter: 1 0;
@@ -39,33 +35,36 @@ class Storage(Container):
         content-align: right middle;
     }
 
-    .info.stacked {
+    Storage.stacked {
         grid-size: 1; 
     }
 
-    .info.stacked #storage-bar {
+    Storage.stacked #storage-bar {
         column-span: 1;
     }
 
-    .info.stacked #used,
-    .info.stacked #total {
+    Storage.stacked #used,
+    Storage.stacked #total {
         content-align: left middle;
     }
     """
 
     narrow = reactive(False)
 
-    def compose(self):
-        with Container(classes = "info"):
-            yield ProgressBar(
-                total = 100,
-                show_percentage = True,
-                show_eta = False,
-                id = "storage-bar"
-            )
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
 
-            yield Label(id = "used")
-            yield Label(id = "total")
+    def compose(self):
+        yield ProgressBar(
+            total = 100,
+            show_percentage = True,
+            show_eta = False,
+            id = "storage-bar"
+        )
+
+        yield Label(id = "used")
+        yield Label(id = "total")
 
     def on_mount(self):
         partitions = disk_partitions(all = False)
@@ -88,4 +87,4 @@ class Storage(Container):
         self.narrow = self.app.size.width < 50
 
     def watch_narrow(self, narrow):
-        self.query_one(".info").set_class(narrow, "stacked")
+        self.set_class(narrow, "stacked")

@@ -21,6 +21,7 @@ class Memory(Container):
     #virtual-memory-plot {
         height: 13;
         column-span: 2;
+        margin-bottom: 1;
     }
 
     #used-memory, #total-memory {
@@ -37,10 +38,6 @@ class Memory(Container):
         grid-size: 1; 
     }
 
-    .info.stacked #virtual-memory-plot {
-        column-span: 1;
-    }
-
     .info.stacked #used-memory,
     .info.stacked #used-swap,
     .info.stacked #total-memory,
@@ -51,17 +48,19 @@ class Memory(Container):
 
     narrow = reactive(False)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
         self.history = [0.0] * 60
 
     def compose(self):
+        yield Plot(id = "virtual-memory-plot")
+
         with Container(classes = "info"):
             yield Label(id = "used-memory")
             yield Label(id = "used-swap")
             yield Label(id = "total-memory")
             yield Label(id = "total-swap")
-            yield Plot(id = "virtual-memory-plot")
     
     def on_mount(self):
         self.update_data()

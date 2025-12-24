@@ -6,10 +6,6 @@ from psutil import cpu_count, cpu_freq, cpu_percent
 class CPU(Container):
     DEFAULT_CSS = """
     CPU {
-        height: auto;
-    }
-    
-    .info {
         layout: grid;
         grid-size: 4;
         grid-gutter: 1 4;
@@ -38,21 +34,21 @@ class CPU(Container):
         column-span: 2;
     }
 
-    .info.two-columns {
+    CPU.two-columns {
         grid-size: 2; 
     }
 
-    .info.two-columns #cpu-usage,
-    .info.two-columns #frequency {
+    CPU.two-columns #cpu-usage,
+    CPU.two-columns #frequency {
         column-span: 1;
     }
 
-    .info.stacked {
+    CPU.stacked {
         grid-size: 1; 
     }
 
-    .info.stacked #cpu-usage,
-    .info.stacked #frequency {
+    CPU.stacked #cpu-usage,
+    CPU.stacked #frequency {
         content-align: left middle;
     }
     """
@@ -60,15 +56,18 @@ class CPU(Container):
     narrow = reactive(False)
     very_narrow = reactive(False)
 
-    def compose(self):
-        with Container(classes = "info"):
-            for i in range(cpu_count()):
-                with Container(classes = "core-info"):
-                    yield Label(f"Core {i + 1}  ", classes = "core-label")
-                    yield ProgressBar(total = 100, show_eta = False, show_percentage = False, id = f"core-bar-{i + 1}", classes = "core-bar")
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
 
-            yield Label(id = "cpu-usage")
-            yield Label(id = "frequency")
+    def compose(self):
+        for i in range(cpu_count()):
+            with Container(classes = "core-info"):
+                yield Label(f"Core {i + 1}  ", classes = "core-label")
+                yield ProgressBar(total = 100, show_eta = False, show_percentage = False, id = f"core-bar-{i + 1}", classes = "core-bar")
+
+        yield Label(id = "cpu-usage")
+        yield Label(id = "frequency")
 
     def on_mount(self):
         self.update_data()
@@ -88,7 +87,7 @@ class CPU(Container):
         self.very_narrow = self.app.size.width < 60
 
     def watch_narrow(self, narrow):
-        self.query_one(".info").set_class(narrow, "two-columns")
+        self.set_class(narrow, "two-columns")
 
     def watch_very_narrow(self, very_narrow):
-        self.query_one(".info").set_class(very_narrow, "stacked")
+        self.set_class(very_narrow, "stacked")

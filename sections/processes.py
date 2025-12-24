@@ -5,11 +5,6 @@ from datetime import datetime
 
 class Processes(Container):
     DEFAULT_CSS = """
-    Processes {
-        height: auto;
-        align: center middle;
-    }
-
     #process-table {
         width: auto;
         max-width: 100%;
@@ -18,6 +13,7 @@ class Processes(Container):
         padding-left: 1;
         padding-right: 1;
         background-tint: transparent 0%;
+        scrollbar-size-horizontal: 0;
     }
 
     #process-table > .datatable--header {
@@ -27,13 +23,20 @@ class Processes(Container):
         color: rgb(220, 150, 80);
     }
 
-    #process-table > .scrollbar--horizontal {
-        dock: top;
+    #process-table > .datatable--cursor {
+        color: rgb(25, 25, 25);
+        text-style: bold;
+        background: rgb(220, 150, 80);
+        background-tint: transparent 0%;
     }
     """
 
+    def __init__(self, classes, id, title):
+        super().__init__(classes = classes, id = id)
+        self.border_title = title
+
     def compose(self):
-        yield DataTable(cursor_type = "none", id = "process-table")
+        yield DataTable(cursor_type = "cell", id = "process-table")
 
     def on_mount(self):
         table = self.query_one("#process-table")
@@ -57,6 +60,7 @@ class Processes(Container):
 
         scroll_x = table.scroll_x
         scroll_y = table.scroll_y
+        cursor_coordinate = table.cursor_coordinate
 
         table.clear()
         
@@ -74,3 +78,9 @@ class Processes(Container):
 
         table.scroll_x = scroll_x
         table.scroll_y = scroll_y
+
+        table.move_cursor(
+            row = cursor_coordinate.row, 
+            column = cursor_coordinate.column, 
+            animate = False
+        )
