@@ -7,7 +7,7 @@ Built with:
 - [Plotext](https://github.com/piccolomo/plotext)
 - [Psutil](https://github.com/giampaolo/psutil)
 
-![Pulse Screenshot](screenshot/pulse.png)
+![Pulse Screenshot](https://raw.githubusercontent.com/harshdeep-rakkar/pulse/master/screenshot/pulse.png)
 
 ## Installation
 
