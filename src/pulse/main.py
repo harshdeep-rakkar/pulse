@@ -2,7 +2,8 @@ import os
 from textual.app import App
 from textual.containers import Container
 from textual.reactive import reactive
-from sections import battery, cpu, memory, network, processes, storage
+
+from .sections import battery, cpu, memory, network, processes, storage
 
 os.environ["COLORTERM"] = "truecolor"
 
@@ -70,6 +71,9 @@ class Pulse(App):
     def watch_narrow(self, narrow):
         self.query_one(".cards").set_class(narrow, "stacked")
 
-if __name__ == "__main__":
+def run():
     app = Pulse()
     app.run()
+
+if __name__ == "__main__":
+    run()

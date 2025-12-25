@@ -3,7 +3,7 @@ from textual.containers import Container
 from textual.widgets import Label
 from textual.reactive import reactive
 
-from plot import Plot
+from ..plot import Plot
 
 class Memory(Container):
     DEFAULT_CSS = """
