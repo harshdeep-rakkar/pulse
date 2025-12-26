@@ -74,12 +74,13 @@ class CPU(Container):
         self.set_interval(1.0, self.update_data)
 
     def update_data(self):
-        core_usage = cpu_percent(percpu = True)
+        per_core_usage = cpu_percent(percpu = True)
+        average_usage = sum(per_core_usage) / len(per_core_usage)
         
-        for i, usage in enumerate(core_usage):
+        for i, usage in enumerate(per_core_usage):
             self.query_one(f"#core-bar-{i + 1}", ProgressBar).update(progress = usage)
         
-        self.query_one("#cpu-usage", Label).update(f"Usage: {cpu_percent()}%")
+        self.query_one("#cpu-usage", Label).update(f"Usage: {average_usage:.2f}%")
         self.query_one("#frequency", Label).update(f"Frequency: {cpu_freq().current:.2f} MHz")
 
     def on_resize(self):

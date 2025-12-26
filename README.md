@@ -1,6 +1,6 @@
 # Pulse
 
-A cross-platform, terminal-based system monitor with an interactive TUI.
+A TUI system monitor for Linux.
 
 Built with:
 - [Textual](https://github.com/textualize/textual/)

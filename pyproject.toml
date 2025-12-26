@@ -1,6 +1,6 @@
 [project]
 name = "pulse-system-monitor"
-version = "0.1.1"
+version = "0.1.2"
 description = "A cross-platform, TUI system monitor."
 readme = "README.md"
 requires-python = ">=3.13"

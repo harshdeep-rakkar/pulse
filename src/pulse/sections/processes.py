@@ -14,6 +14,7 @@ class Processes(Container):
         padding-right: 1;
         background-tint: transparent 0%;
         scrollbar-size-horizontal: 0;
+        scrollbar-size-vertical: 0;
     }
 
     #process-table > .datatable--header {
